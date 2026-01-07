@@ -1,0 +1,1 @@
+We're having persistent issues here, so will need to add additional structure to debug it. Will be aggressive about separation of concerns as a first step. 

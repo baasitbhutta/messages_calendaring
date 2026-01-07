@@ -1,0 +1,7 @@
+The SPEC.md file is for defining a spec, including desired behaviors.
+The ARCHITECTURE.md file is for planning the high-level technical implementation of the product. 
+Every time the user makes changes to the SPEC.md, consider whether that will necessitate changes to the ARCHITECTURE.md file. If any material decisions have to be made before making changes to the ARCHITECTURE file to align with the changes to the SPEC, then ask those questions to the user.
+Whenever presenting questions to the user, first order those questions so that questions that are dependent on answers from other questions are "downstream" of those questions, and present the most upstream, highest leverage question to the user first. 
+When making an implementation change that implicates an architectural issue, also update the ARCHITECTURE file accordingly. When making an implementation change that implicates a behavbioral issue, update the SPEC file accordingly. 
+Maintain a strong separation of concerns. As a rule of thumb, no individual coding script should have much more than 300 lines of code in it.
+Strong observability and being able to debug quickly is a priority. Therefore, in all code, there should be attention paid to observability. 
