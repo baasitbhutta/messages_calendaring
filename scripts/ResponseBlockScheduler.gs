@@ -46,7 +46,7 @@ function scheduleResponseBlock(calendar, date, blockConfig) {
   if (existingBlock) {
     if (!hasGuestConflict(calendar, existingBlock.getStartTime(), existingBlock.getEndTime(), existingBlock.getId())) {
       // No conflict, keep existing block but enforce correct properties
-      enforceBlockProperties(existingBlock, 'response');
+      enforceBlockProperties(existingBlock, calendar, 'response');
       logDebug(`Keeping existing ${blockConfig.name} response block at ${formatTime(existingBlock.getStartTime())}`);
       incrementStat('responseBlocksKept');
       return;

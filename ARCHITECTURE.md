@@ -11,7 +11,7 @@ This document describes the technical implementation of the Message Response Blo
 | Component | Technology |
 |-----------|------------|
 | **Runtime** | Google Apps Script (JavaScript-based) |
-| **Calendar API** | CalendarApp (built-in Apps Script service) |
+| **Calendar API** | CalendarApp (built-in) + Advanced Calendar Service (for transparency) |
 | **Trigger** | Time-driven installable trigger |
 | **Storage** | None (stateless design) |
 
@@ -193,11 +193,15 @@ function createBlock(calendar, title, startTime, endTime)
 
 **Purpose:** Creates a new message block with the correct properties.
 
+**Implementation:** Uses Advanced Calendar Service (`Calendar.Events.insert()`) to access the transparency property.
+
 **Properties set:**
 - Title
 - Start/end time
 - Visibility: PUBLIC
-- Reminders: None (remove default reminders)
+- Transparency: transparent (shows as "Free" instead of "Busy")
+- Color: Graphite/gray
+- Reminders: None
 
 ---
 
@@ -298,7 +302,18 @@ For each day:
 
 ---
 
-## Trigger Setup
+## Service Setup
+
+### Advanced Calendar Service
+
+The script requires the Advanced Calendar Service to be enabled for setting block transparency:
+
+1. Open Apps Script editor
+2. Click **Services** (the "+" icon in the left sidebar)
+3. Find and add **Google Calendar API**
+4. It will appear as `Calendar` in your project
+
+### Trigger Setup
 
 The time-driven trigger must be configured manually in the Apps Script editor:
 
@@ -380,7 +395,19 @@ Result:
 |--------|---------|
 | `getDefaultCalendar()` | Get primary calendar |
 | `getEvents(start, end)` | Query events in range |
-| `createEvent(title, start, end)` | Create new event |
+
+### Advanced Calendar Service (Calendar API v3)
+
+The Advanced Calendar Service is used for creating and updating blocks because the built-in CalendarApp does not support the `transparency` property needed to show events as "Free".
+
+| Method | Purpose |
+|--------|---------|
+| `Calendar.Events.insert(event, calendarId)` | Create event with transparency |
+| `Calendar.Events.patch(event, calendarId, eventId)` | Update event properties |
+
+**Transparency values:**
+- `'opaque'` — Shows as "Busy" (default)
+- `'transparent'` — Shows as "Free"
 
 ### CalendarEvent
 

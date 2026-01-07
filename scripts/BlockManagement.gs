@@ -106,6 +106,7 @@ function deleteBlock(event, blockType = 'check') {
 
 /**
  * Create a new message block with the correct properties.
+ * Uses Advanced Calendar Service to set transparency (show as "Free").
  * 
  * @param {Calendar} calendar - The calendar to create on
  * @param {string} title - Event title
@@ -113,24 +114,28 @@ function deleteBlock(event, blockType = 'check') {
  * @param {Date} endTime - Block end time
  * @param {string} blockType - Type of block for stats tracking ('check' or 'response')
  * @param {boolean} isShortened - Whether this is a shortened response block
- * @returns {CalendarEvent} The created event
+ * @returns {Object} The created event (Advanced Calendar API response)
  */
 function createBlock(calendar, title, startTime, endTime, blockType = 'check', isShortened = false) {
   const durationMin = Math.round((endTime - startTime) / (60 * 1000));
+  const calendarId = calendar.getId();
   
   logInfo(`Creating block: ${title} at ${formatTime(startTime)} (${durationMin}min)`);
   
   try {
-    const event = calendar.createEvent(title, startTime, endTime);
-    
-    // Set visibility to PUBLIC
-    event.setVisibility(CalendarApp.Visibility.PUBLIC);
-    
-    // Set color to gray/graphite (closest to black)
-    event.setColor(CalendarApp.EventColor.GRAY);
-    
-    // Remove all reminders
-    event.removeAllReminders();
+    // Use Advanced Calendar Service to set transparency
+    const event = Calendar.Events.insert({
+      summary: title,
+      start: { dateTime: startTime.toISOString() },
+      end: { dateTime: endTime.toISOString() },
+      transparency: 'transparent',  // Show as "Free" instead of "Busy"
+      visibility: 'public',
+      colorId: '8',  // Graphite/gray color
+      reminders: { 
+        useDefault: false, 
+        overrides: []  // No reminders
+      }
+    }, calendarId);
     
     // Track statistics
     if (blockType === 'check') {
@@ -143,10 +148,11 @@ function createBlock(calendar, title, startTime, endTime, blockType = 'check', i
     }
     
     logDebug(`Block created successfully`, {
-      eventId: event.getId(),
+      eventId: event.id,
       title: title,
       start: formatTime(startTime),
-      end: formatTime(endTime)
+      end: formatTime(endTime),
+      transparency: 'transparent'
     });
     
     return event;
@@ -162,40 +168,37 @@ function createBlock(calendar, title, startTime, endTime, blockType = 'check', i
 
 /**
  * Enforce correct properties on an existing block.
- * Called when keeping an existing block to ensure color and visibility are correct.
+ * Called when keeping an existing block to ensure color, visibility, and transparency are correct.
+ * Uses Advanced Calendar Service to set transparency (show as "Free").
  * 
  * @param {CalendarEvent} event - The event to enforce properties on
+ * @param {Calendar} calendar - The calendar containing the event
  * @param {string} blockType - Type of block for logging ('check' or 'response')
  */
-function enforceBlockProperties(event, blockType = 'check') {
+function enforceBlockProperties(event, calendar, blockType = 'check') {
   const title = event.getTitle();
   const startTime = event.getStartTime();
-  let propertiesUpdated = false;
+  const eventId = event.getId().split('@')[0];  // Extract event ID without calendar domain
+  const calendarId = calendar.getId();
   
   try {
-    // Enforce color to gray/graphite
-    const currentColor = event.getColor();
-    if (currentColor !== CalendarApp.EventColor.GRAY) {
-      event.setColor(CalendarApp.EventColor.GRAY);
-      propertiesUpdated = true;
-      logDebug(`Corrected color on ${blockType} block`, {
-        title: title,
-        start: formatTime(startTime),
-        previousColor: currentColor || 'default',
-        newColor: 'GRAY'
-      });
-    }
+    // Use Advanced Calendar Service to update properties including transparency
+    Calendar.Events.patch({
+      colorId: '8',              // Graphite/gray color
+      visibility: 'public',
+      transparency: 'transparent'  // Show as "Free" instead of "Busy"
+    }, calendarId, eventId);
     
-    // Enforce visibility to PUBLIC
-    event.setVisibility(CalendarApp.Visibility.PUBLIC);
-    
-    if (propertiesUpdated) {
-      incrementStat(`${blockType}BlocksPropertyEnforced`);
-      logInfo(`Enforced properties on existing ${blockType} block at ${formatTime(startTime)}`);
-    }
+    incrementStat(`${blockType}BlocksPropertyEnforced`);
+    logDebug(`Enforced properties on ${blockType} block`, {
+      title: title,
+      start: formatTime(startTime),
+      transparency: 'transparent'
+    });
   } catch (error) {
     logError(`Failed to enforce properties on block: ${title}`, {
       startTime: formatTime(startTime),
+      eventId: eventId,
       error: error.message
     });
     // Don't throw - property enforcement is not critical

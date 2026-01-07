@@ -42,7 +42,7 @@ function scheduleCheckBlock(calendar, date, hour) {
     // Check if existing block has a conflict
     if (!hasGuestConflict(calendar, existingBlock.getStartTime(), existingBlock.getEndTime(), existingBlock.getId())) {
       // No conflict, keep existing block but enforce correct properties
-      enforceBlockProperties(existingBlock, 'check');
+      enforceBlockProperties(existingBlock, calendar, 'check');
       logDebug(`Keeping existing check block at ${formatTime(existingBlock.getStartTime())}`);
       incrementStat('checkBlocksKept');
       return;
