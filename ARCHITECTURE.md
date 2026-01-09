@@ -27,7 +27,7 @@ scripts/
 ├── ConflictDetection.gs      # Conflict detection logic (~115 lines)
 ├── BlockManagement.gs        # Block CRUD operations (~140 lines)
 ├── CheckBlockScheduler.gs    # 5-minute block scheduling (~130 lines)
-├── ResponseBlockScheduler.gs # 45-minute block scheduling (~260 lines)
+├── ResponseBlockScheduler.gs # 30-minute block scheduling (~260 lines)
 ├── Main.gs                   # Entry point and orchestration (~200 lines)
 └── README.md                 # Setup instructions
 ```
@@ -48,7 +48,7 @@ const LOOKAHEAD_DAYS = 7;
 
 // Block definitions
 const MESSAGE_CHECK_DURATION = 5;      // minutes
-const MESSAGE_RESPONSE_DURATION = 45;  // minutes
+const MESSAGE_RESPONSE_DURATION = 30;  // minutes
 
 // Event titles (used for identification)
 const CHECK_TITLE = "Message Check";
@@ -58,7 +58,7 @@ const RESPONSE_TITLE = "Message Response";
 // Note: 16 (4:55 PM) excluded - too close to EOD response block
 const CHECK_HOURS = [9, 10, 11, 13, 14, 15];
 
-// 45-minute block definitions
+// 30-minute block definitions
 const RESPONSE_BLOCKS = [
   {
     name: "post-lunch",
@@ -72,11 +72,11 @@ const RESPONSE_BLOCKS = [
   {
     name: "eod",
     defaultStartHour: 17,
-    defaultStartMinute: 15,
+    defaultStartMinute: 30,
     windowStartHour: 15,
-    windowStartMinute: 15,
+    windowStartMinute: 30,
     windowEndHour: 17,
-    windowEndMinute: 15
+    windowEndMinute: 30
   }
 ];
 ```
@@ -227,13 +227,13 @@ function scheduleCheckBlock(calendar, date, hour)
 
 ---
 
-### 6. Conflict Resolution — 45-Minute Blocks
+### 6. Conflict Resolution — 30-Minute Blocks
 
 ```javascript
 function scheduleResponseBlock(calendar, date, blockConfig)
 ```
 
-**Purpose:** Schedules a 45-minute response block with reschedule window support.
+**Purpose:** Schedules a 30-minute response block with reschedule window support.
 
 **Algorithm:**
 1. Calculate default time from `blockConfig`
@@ -243,7 +243,7 @@ function scheduleResponseBlock(calendar, date, blockConfig)
 3. **Try the default time first** (e.g., 12:45 PM for post-lunch)
    - If no conflict at default time → create block there and done
 4. If default time has conflict:
-   - Search for available 45-minute slot within window **closest to default time** (minimal shift)
+   - Search for available 30-minute slot within window **closest to default time** (minimal shift)
    - If found → use it
    - If not found → search for largest available gap
    - If gap ≥ 15 min → create shorter block
@@ -284,7 +284,7 @@ For each day:
   
   3. Process 45-minute blocks (in order):
      a. Post-lunch block (12:45 PM default)
-     b. EOD block (5:15 PM default)
+     b. EOD block (5:30 PM default)
   
   4. Process 5-minute blocks (in order):
      a. 9:55 AM
@@ -295,7 +295,7 @@ For each day:
      f. 3:55 PM
 ```
 
-45-minute blocks are processed first because:
+30-minute blocks are processed first because:
 - They have stricter time requirements
 - They're higher priority for actual message handling
 - 5-minute blocks are more flexible and can route around them
@@ -351,23 +351,23 @@ Result:
 
 ### Shortened Response Blocks
 
-When a 45-minute slot isn't available but a smaller gap exists:
+When a 30-minute slot isn't available but a smaller gap exists:
 
 ```
 Scenario:
   - Post-lunch window: 10:45 AM - 2:45 PM
-  - Meetings at: 11:00-12:00, 12:30-2:00
-  - Available gaps: 10:45-11:00 (15 min), 12:00-12:30 (30 min), 2:00-2:45 (45 min)
+  - Meetings at: 11:00-12:00, 12:30-2:15
+  - Available gaps: 10:45-11:00 (15 min), 12:00-12:30 (30 min), 2:15-2:45 (30 min)
 
 Result:
-  - 45-min slot found at 2:00-2:45 → use it
+  - 30-min slot found at 12:00-12:30 → use it
   
-Alternative scenario (no 45-min slot):
-  - Meetings at: 11:00-12:00, 12:30-2:30
-  - Available gaps: 10:45-11:00 (15 min), 12:00-12:30 (30 min), 2:30-2:45 (15 min)
+Alternative scenario (no 30-min slot):
+  - Meetings at: 11:00-12:00, 12:15-2:30
+  - Available gaps: 10:45-11:00 (15 min), 12:00-12:15 (15 min), 2:30-2:45 (15 min)
   
 Result:
-  - Largest gap is 30 min (12:00-12:30) → create 30-min block
+  - Largest gap is 15 min → create 15-min block
 ```
 
 ### Meeting Scheduled After Blocks Created

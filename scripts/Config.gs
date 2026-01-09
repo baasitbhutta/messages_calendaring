@@ -22,7 +22,7 @@ const LOOKAHEAD_DAYS = 7;
 // ============================================================================
 
 const MESSAGE_CHECK_DURATION = 5;
-const MESSAGE_RESPONSE_DURATION = 45;
+const MESSAGE_RESPONSE_DURATION = 30;
 const MIN_RESPONSE_DURATION = 15;  // Minimum duration for shortened blocks
 
 // ============================================================================
@@ -41,7 +41,7 @@ const RESPONSE_TITLE = "Message Response";
 const CHECK_HOURS = [9, 10, 11, 13, 14, 15];
 
 // ============================================================================
-// 45-MINUTE RESPONSE BLOCK DEFINITIONS
+// 30-MINUTE RESPONSE BLOCK DEFINITIONS
 // ============================================================================
 
 const RESPONSE_BLOCKS = [
@@ -57,11 +57,11 @@ const RESPONSE_BLOCKS = [
   {
     name: "eod",
     defaultStartHour: 17,
-    defaultStartMinute: 15,
+    defaultStartMinute: 30,
     windowStartHour: 15,
-    windowStartMinute: 15,
+    windowStartMinute: 30,
     windowEndHour: 17,
-    windowEndMinute: 15
+    windowEndMinute: 30
   }
 ];
 

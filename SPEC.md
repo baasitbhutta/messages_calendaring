@@ -37,25 +37,25 @@ Short blocks at the end of each hour to quickly check for new messages.
 
 ---
 
-### 2. Message Response (45 minutes)
+### 2. Message Response (30 minutes)
 
 Longer blocks for actually responding to messages.
 
 #### Post-Lunch Block
 | Property | Value |
 |----------|-------|
-| **Duration** | 45 minutes |
-| **Default Time** | 12:45 PM - 1:30 PM |
+| **Duration** | 30 minutes |
+| **Default Time** | 12:45 PM - 1:15 PM |
 | **Event Title** | "Message Response" |
 | **Reschedule Window** | ±2 hours (10:45 AM - 2:45 PM) |
 
 #### End-of-Day Block
 | Property | Value |
 |----------|-------|
-| **Duration** | 45 minutes |
-| **Default Time** | 5:15 PM - 6:00 PM |
+| **Duration** | 30 minutes |
+| **Default Time** | 5:30 PM - 6:00 PM |
 | **Event Title** | "Message Response" |
-| **Reschedule Window** | Up to 2 hours earlier (3:15 PM - 5:15 PM) |
+| **Reschedule Window** | Up to 2 hours earlier (3:30 PM - 5:30 PM) |
 
 ---
 
@@ -111,18 +111,18 @@ If an **all-day Out of Office event** exists for a day, skip creating any messag
 3. If back-to-back meetings cause multiple blocks to need shifting, shift all affected blocks accordingly
 4. Blocks should still occur before the next hour's scheduled block if possible
 
-### For 45-Minute Message Response Blocks
+### For 30-Minute Message Response Blocks
 
-1. **First, try the default time** (12:45 PM for post-lunch, 5:15 PM for EOD)
-2. If the default time has a conflict, **search for an available 45-minute window** within the reschedule band that is **closest to the default time** (minimal shift)
-3. If no 45-minute window is available, **create a shorter block** that fits within the available space in the same window
+1. **First, try the default time** (12:45 PM for post-lunch, 5:30 PM for EOD)
+2. If the default time has a conflict, **search for an available 30-minute window** within the reschedule band that is **closest to the default time** (minimal shift)
+3. If no 30-minute window is available, **create a shorter block** that fits within the available space in the same window
 4. If no space is available at all, **skip the block** for that day
 
 **Note:** When rescheduling, the script prefers the slot with the smallest shift from the default time, rather than simply picking the earliest available slot.
 
 ### Processing Order
 
-**45-minute blocks are processed first**, then 5-minute blocks. This ensures the larger, higher-priority response blocks get the best available slots before the flexible check blocks are scheduled.
+**30-minute blocks are processed first**, then 5-minute blocks. This ensures the larger, higher-priority response blocks get the best available slots before the flexible check blocks are scheduled.
 
 ---
 
@@ -180,10 +180,10 @@ If a meeting is scheduled *after* message blocks were already created, the scrip
 | 9:55 AM | Message Check | 5 min |
 | 10:55 AM | Message Check | 5 min |
 | 11:55 AM | Message Check | 5 min |
-| 12:45 PM | Message Response | 45 min |
+| 12:45 PM | Message Response | 30 min |
 | 1:55 PM | Message Check | 5 min |
 | 2:55 PM | Message Check | 5 min |
 | 3:55 PM | Message Check | 5 min |
-| 5:15 PM | Message Response | 45 min |
+| 5:30 PM | Message Response | 30 min |
 
-**Total daily message time:** 30 min (checks) + 90 min (responses) = **2 hours**
+**Total daily message time:** 30 min (checks) + 60 min (responses) = **1.5 hours**
